@@ -1,0 +1,645 @@
+.. ngsSRA documentation master file, created by
+   sphinx-quickstart on Wed Dec 14 13:34:39 2022.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+
+
+
+Welcome to the NGS tutorial
+===========================
+**The NGS tutorial** will guide you from raw SRA files to VCF variants.
+We start with the SRA data from NCBI. Then, we convert them to fastq using the sra-toolkit and then we apply samtools and bcftools to obtain variants.
+We will use A. thaliana data to demonstrate the pipeline
+
+.. sectnum::
+
+Download some data
+------------------
+Perhaps, this is the most difficult part of the whole pipeline i.e., **where to find data**. Usually, we download data from the NCBI, ENA or other resources, such as the 1000Genomes project or the Arabidopsis project or other web databases.
+
+Overview
+--------
+
+The following steps will be followed:
+
+#. Download and install the `sra-toolkit <https://github.com/ncbi/sra-tools>`_.
+#. Get some data from NCBI (it is supposed that you already know the ID of the runs)
+#. Download the SRA data
+#. Convert the data to fastq format
+#. **Mapping**: Run `bwa mem` to perform mapping
+#. **SAMTOOLS**: Samtools will do some additional operations, such a sorting, fixing the mate flags
+#. **Calling**: Use bcftools to call the genotypes and produce the GVCF files. 
+#. **Merge the files**: Merge all individual files to a single file containing the information from all sequencded individuals.
+#. **Final SNP calling and VCF production**
+
+   The final product will be a single VCF file that contains **just the SNPs**. Here, there is a specific definition of what a SNP is: **A SNP is a position that at least one individual is different from the reference**. This means, that **a SNP might actually be monomorphic if all individuals are homozygous for the state that is not present in the reference genome**. 
+
+
+Download and install the sra-toolkit
+------------------------------------
+   #. Download and install `sra-toolkit <https://github.com/ncbi/sra-tools>`_.
+      Even if you can build the code from the source, luckily, there is a link to pre-compiled software available for you system. The link is here `PRECOMPILED SRA-TOOLKIT <https://github.com/ncbi/sra-tools/wiki/01.-Downloading-SRA-Toolkit>`_. For my system, I used the `Ubuntu Linux 64bit architecture <https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/3.0.2/sratoolkit.3.0.2-ubuntu64.tar.gz>`_, even though I'm running a Debian system. It works fine.
+   #. After you download and unzip the code, you can navigate inside the **sratoolkit.3.0.1-ubuntu64** folder and then inside the **bin** directory. There, you can see the following files:
+
+   .. image:: ../_images/sradir.png
+      :width: 800
+      :alt: Green-colored files denote the executables. Light-blue files denote softlinks to the executables (e.g., without the version name) for easier usage.
+
+   #. It is comfortable to modify your PATH variable, to include this specific directory in the PATH variable.
+      * Open the `~/.bashrc` file (e.g. :code:`emacs -nw ~/.bashrc` or :code:`vim ~/.bashrc` or :code:`nano ~/.bashrc`) and go to the end of the file. Then type something like:
+	
+      .. code:: bash
+
+	   PATH=/home/pavlos/software/sratoolkit.3.0.1-ubuntu64/bin/:$PATH
+	   export PATH
+	   
+      In this case, the :code:`/home/pavlos/software/sratoolkit.3.0.1-ubuntu64/bin/` is the directory that I want to add in the PATH. Please MODIFY it according to your own path. Then, save and close the file and type in the terminal:
+
+      .. code:: bash
+		
+	 source ~/.bashrc  ## or . ~/.bashrc
+
+      .. note::
+
+	 Do NOT forget the $PATH part at the end of the PATH=.... Otherwise, you will destroy the PATH variable of the system. Thus, you actually append to the PATH variable the directory that you need.
+
+
+Download some data using the sra-toolkit
+----------------------------------------
+Now, that all the tools from the sra-toolkit software package, we are ready to download some data from the SRA database of the NCBI. The SRA file format contains all the information (sequence and base qualities) but they cannot be used directly for the downstream analyses. Thus, we will download them and then we will convert them to FASTQ files.
+
+Finding the proper SRA files isn't a very trivial task, since **there are tones of data out there... but they are not so well organized**. For example, at least, for me it's not trivial at all how to get all SRA files for humans that sampled in Europe. Anyway, in this tutorial we will cheat a bit and we will give you just 3 SRA IDs for 3 Arabidopsis plants. If we have a list of SRA files, then it's easy to get the data. The difficult task is to find the SRA IDs we need.
+
+The data we will download have the following SRA IDs:
+
+.. code:: bash
+
+	  SRR1945435
+	  SRR1945436
+	  SRR1945437
+
+To get a file, we will use the :code:`prefetch` command from the sra-toolkit. Thus just type:
+
+.. code:: bash
+
+	  prefetch SRR1945435
+
+This will just download the SRR1945435 file. If you have saved all the IDs in a file called e.g., "accesions.txt", you can type
+
+.. code:: bash
+
+	  prefetch --option-file accesions.txt
+
+This will take **some time**. The SRA files are quite large, so please be patient. Also, you need to have **sufficient amount of avaialbe hard disk space**.
+
+Convert the data from SRA to fastq
+----------------------------------
+We will use the :code:`fasterq-dump` to convert the downloaded SRA files to the fastq format. Here we assume paired-end format, so two files will be generated. 
+
+.. note::
+   If our reads are paired-end, then two fastq files will be created. The first will look like \*_1.fastq.gz and the second \*_2.fastq.gz.
+
+   
+.. code:: bash
+
+	  fasterq-dump SRR1945437.sra
+
+
+.. note::
+   The sra files have been stored within folders entitled as their ID. Thus a more efficient way to convert all the SRA to fastq is something like the following command:
+   
+   .. code:: bash
+
+	     for file in `find -iname '*.sra' | xargs ls` ## The "| xargs ls" part can be removed. I just want to have the files alphabetically ordered. 
+	     do
+	     echo $file;
+	     fasterq-dump $file;
+	     done
+
+The fastq files will be stored in the folder that we run the command.
+
+
+The Quality Control and the mapping process
+-------------------------------------------
+
+.. todo::
+   
+The quality control (QC) is an important part of the analysis since it can save you from the analysis of low-quality data. We will go through that in another tutorial. For now, let's suppose that the data is of good quality and proceed with the mappign process 
+	  
+
+
+
+	
+	
+	
+   
+
+
+  ..
+   Learning outcomes
+      -----------------
+
+      After studying this section of the tutorial you should be able to:
+
+      #. Explain the process of sequence read mapping.
+      #. Use bioinformatics tools to map sequencing reads to a reference genome.
+      #. Filter mapped reads based on quality.
+
+
+      Before we start
+      ---------------
+
+      Lets see how our directory structure looks so far:
+
+      .. code:: bash
+
+		$ cd ~/analysis
+		# create a mapping result directory
+		$ mkdir mappings
+		$ ls -1F
+
+
+      .. code:: bash
+
+		assembly/
+		data/
+		mappings/
+		multiqc_data/
+		multiqc_report.html
+		trimmed/
+		trimmed-fastqc/
+
+
+      .. attention::
+
+	  If you have not run the previous sections on :ref:`ngs-qc` and :ref:`ngs-assembly`, you can download the trimmed data and the genome assembly needed for this section here: :ref:`downloads`. Download the files to the ``~/analysis`` directory and decompress. Alternatively on the CLI try: 
+
+	  .. code:: bash
+
+	       cd ~/analysis
+	       wget -O trimmed.tar.gz https://osf.io/m3wpr/download 
+	       tar xvzf trimmed.tar.gz
+	       wget -O assembly.tar.gz https://osf.io/t2zpm/download
+	       tar xvzf assembly.tar.gz
+
+
+      Mapping sequence reads to a reference genome
+      --------------------------------------------
+
+      We want to map the sequencing reads to the ancestral reference genome.
+      We are going to use the quality trimmed forward and backward DNA sequences of the evolved line and use a program called |bwa| to map the reads.
+
+      .. todo::
+
+	 #. Discuss briefly why we are using the ancestral genome as a reference genome as opposed to a genome for the evolved line.
+
+
+      Downloading the reference genome assembly
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+      .. todo::
+
+	 In the assembly section at ":ref:`ngs-assembly`", we created a genome assembly. However, we actually used sub-sampled data as otherwise the assemblies would have taken a long time to finish. To continue, please download the assembly created on the complete dataset (:ref:`downloads`). Unarchive and uncompress the files with ``tar -xvzf assembly.tar.gz``.
+
+
+      Installing the software
+      ~~~~~~~~~~~~~~~~~~~~~~~
+
+      We are going to use a program called |bwa| to map our reads to our genome.
+
+      It is simple to install and use.
+
+      .. code:: bash
+
+	  $ conda create --yes -n mapping samtools bwa qualimap r-base
+	  $ conda activate mapping
+
+
+      BWA
+      ---
+
+
+      Overview
+      ~~~~~~~~
+
+      |bwa| is a short read aligner, that can take a reference genome and map single- or paired-end sequence data to it [LI2009]_.
+      It requires an indexing step in which one supplies the reference genome and |bwa| will create an index that in the subsequent steps will be used for aligning the reads to the reference genome.
+      While this step can take some time, the good thing is the index can be reused over and over.
+      The general command structure of the |bwa| tools we are going to use are shown below:
+
+      .. code:: bash
+
+	 # bwa index help
+	 $ bwa index
+
+	 # indexing
+	 $ bwa index path/to/reference-genome.fa
+
+	 # bwa mem help
+	 $ bwa mem
+
+	 # single-end mapping, general command structure, adjust to your case
+	 $ bwa mem path/to/reference-genome.fa path/to/reads.fq.gz > path/to/aln-se.sam
+
+	 # paired-end mapping, general command structure, adjust to your case
+	 $ bwa mem path/to/reference-genome.fa path/to/read1.fq.gz path/to/read2.fq.gz > path/to/aln-pe.sam
+
+
+
+      Creating a reference index for mapping
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+      .. todo::
+
+	 Create an |bwa| index for our reference genome assembly. Attention! Remember which file you need to submit to |bwa|.
+
+
+      .. hint::
+
+	 Should you not get it right, try the commands in :ref:`code-bwa1`.
+
+
+      .. note::
+
+	 Should you be unable to run |bwa| indexing on the data, you can download the index from :ref:`downloads`. Unarchive and uncompress the files with ``tar -xvzf bwa-index.tar.gz``.
+
+
+
+
+      Mapping reads in a paired-end manner
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+      Now that we have created our index, it is time to map the trimmed sequencing reads of our two evolved line to the reference genome.
+
+      .. todo::
+
+	 Use the correct ``bwa mem`` command structure from above and map the reads of the two evolved line to the reference genome.
+
+
+      .. hint::
+
+	 Should you not get it right, try the commands in :ref:`code-bwa2`.
+
+
+      .. _sam-file-format:
+
+      The sam mapping file-format
+      ---------------------------
+
+      |bwa|, like most mappers, will produce a mapping file in sam-format. Have a look into the sam-file that was created by either program.
+      A quick overview of the sam-format can be found `here <http://bio-bwa.sourceforge.net/bwa.shtml#4>`__ and even more information can be found `here <http://samtools.github.io/hts-specs/SAMv1.pdf>`__.
+      Briefly, first there are a lot of header lines. Then, for each read, that mapped to the reference, there is one line.
+
+      The columns of such a line in the mapping file are described in :numref:`table-sam`.
+
+      .. _table-sam:
+      .. table:: The sam-file format fields.
+
+	 +-----+---------+-----------------------------------------------------------+
+	 | Col |  Field  | Description                                               |
+	 +=====+=========+===========================================================+
+	 | 1   | QNAME   | Query (pair) NAME                                         |
+	 +-----+---------+-----------------------------------------------------------+
+	 | 2   | FLAG    | bitwise FLAG                                              |
+	 +-----+---------+-----------------------------------------------------------+
+	 | 3   | RNAME   | Reference sequence NAME                                   |
+	 +-----+---------+-----------------------------------------------------------+
+	 | 4   | POS     | 1-based leftmost POSition/coordinate of clipped sequence  |
+	 +-----+---------+-----------------------------------------------------------+
+	 | 5   | MAPQ    | MAPping Quality (Phred-scaled)                            |
+	 +-----+---------+-----------------------------------------------------------+
+	 | 6   | CIAGR   | extended CIGAR string                                     |
+	 +-----+---------+-----------------------------------------------------------+
+	 | 7   | MRNM    | Mate Reference sequence NaMe (‘=’ if same as RNAME)       |
+	 +-----+---------+-----------------------------------------------------------+
+	 | 8   | MPOS    | 1-based Mate POSition                                     |
+	 +-----+---------+-----------------------------------------------------------+
+	 | 9   | ISIZE   | Inferred insert SIZE                                      |
+	 +-----+---------+-----------------------------------------------------------+
+	 | 10  | SEQ     | query SEQuence on the same strand as the reference        |
+	 +-----+---------+-----------------------------------------------------------+
+	 | 11  | QUAL    | query QUALity (ASCII-33 gives the Phred base quality)     |
+	 +-----+---------+-----------------------------------------------------------+
+	 | 12  | OPT     | variable OPTional fields in the format TAG\:VTYPE\:VALUE  |
+	 +-----+---------+-----------------------------------------------------------+
+
+      One line of a mapped read can be seen here:
+
+      .. code:: bash
+
+	  M02810:197:000000000-AV55U:1:1101:10000:11540   83      NODE_1_length_1419525_cov_15.3898       607378  60      151M    =       607100  -429    TATGGTATCACTTATGGTATCACTTATGGCTATCACTAATGGCTATCACTTATGGTATCACTTATGACTATCAGACGTTATTACTATCAGACGATAACTATCAGACTTTATTACTATCACTTTCATATTACCCACTATCATCCCTTCTTTA FHGHHHHHGGGHHHHHHHHHHHHHHHHHHGHHHHHHHHHHHGHHHHHGHHHHHHHHGDHHHHHHHHGHHHHGHHHGHHHHHHFHHHHGHHHHIHHHHHHHHHHHHHHHHHHHGHHHHHGHGHHHHHHHHEGGGGGGGGGFBCFFFFCCCCC NM:i:0  MD:Z:151        AS:i:151        XS:i:0
+
+      It basically defines the read and the position within the reference genome, where the read mapped and a quality of the mapping.
+
+
+      Mapping post-processing
+      -----------------------
+
+      Fix mates and compress
+      ~~~~~~~~~~~~~~~~~~~~~~
+
+      Because aligners can sometimes leave unusual `SAM flag <http://bio-bwa.sourceforge.net/bwa.shtml#4>`__ information on SAM records, it is helpful when working with many tools to first clean up read pairing information and flags with |samtools|.
+      We are going to produce also compressed bam output for efficient storing of and access to the mapped reads.
+      Note, ``samtools fixmate`` expects **name-sorted** input files, which we can achieve with ``samtools sort -n``.
+
+
+      .. code:: bash
+
+	  $ samtools sort -n -O sam mappings/evol1.sam | samtools fixmate -m -O bam - mappings/evol1.fixmate.bam
+
+
+      - ``-m``: Add ms (mate score) tags. These are used by markdup (below) to select the best reads to keep.
+      - ``-O bam``: specifies that we want compressed bam output from fixmate
+
+
+      .. attention::
+
+	 The step of sam to bam-file conversion might take a few minutes to finish, depending on how big your mapping file is.
+
+
+      We will be using the `SAM flag <http://bio-bwa.sourceforge.net/bwa.shtml#4>`__ information later below to extract specific alignments.
+
+      .. hint::
+
+	 A very useful tools to explain flags can be found `here <http://broadinstitute.github.io/picard/explain-flags.html>`__.
+
+
+      Once we have ``bam``-file, we can also delete the original ``sam``-file as it requires too much space and we can always recreate it from the ``bam``-file.
+
+
+      .. code:: bash
+
+	  $ rm mappings/evol1.sam
+
+
+      Sorting
+      ~~~~~~~
+
+      We are going to use |samtools| again to sort the bam-file into **coordinate order**:
+
+
+      .. code:: bash
+
+	  # convert to bam file and sort
+	  $ samtools sort -O bam -o mappings/evol1.sorted.bam mappings/evol1.fixmate.bam
+
+	  # Once it successfully finished, delete the fixmate file to save space
+	  $ rm mappings/evol1.fixmate.bam
+
+
+      - ``-o``: specifies the name of the output file.
+      - ``-O bam``: specifies that the output will be bam-format
+
+
+      Remove duplicates
+      ~~~~~~~~~~~~~~~~~
+
+      In this step we remove duplicate reads. The main purpose of removing duplicates is to mitigate the effects of PCR amplification bias introduced during library construction.
+      **It should be noted that this step is not always recommended.**
+      It depends on the research question.
+      In SNP calling it is a good idea to remove duplicates, as the statistics used in the tools that call SNPs sub-sequently expect this (most tools anyways).
+      However, for other research questions that use mapping, you might not want to remove duplicates, e.g. RNA-seq.
+
+      .. code:: bash
+
+	  $ samtools markdup -r -S mappings/evol1.sorted.bam mappings/evol1.sorted.dedup.bam
+
+	  # if it worked, delete the original file
+	  $ rm mappings/evol1.sorted.bam
+
+
+      .. todo::
+
+	 Figure out what "PCR amplification bias" means.
+
+
+      .. note::
+
+	 Should you be unable to do the post-processing steps, you can download the mapped data from :ref:`downloads`.
+
+
+      Mapping statistics
+      ------------------
+
+      Stats with SAMtools
+      ~~~~~~~~~~~~~~~~~~~
+
+      Lets get an mapping overview:
+
+
+      .. code:: bash
+
+	  $ samtools flagstat mappings/evol1.sorted.dedup.bam
+
+
+      .. todo::
+
+	 Look at the mapping statistics and understand `their meaning
+	 <https://www.biostars.org/p/12475/>`__. Discuss your results.
+	 Explain why we may find mapped reads that have their mate mapped to a different chromosome/contig?
+	 Can they be used for something?
+
+
+      For the sorted bam-file we can get read depth for at all positions of the reference genome, e.g. how many reads are overlapping the genomic position.
+
+
+      .. code:: bash
+
+	  $ samtools depth mappings/evol1.sorted.dedup.bam | gzip > mappings/evol1.depth.txt.gz
+
+
+      .. todo::
+
+	 Extract the depth values for contig 20 and load the data into R, calculate some statistics of our scaffold.
+
+
+      .. code:: bash
+
+	 $ zcat mappings/evol1.depth.txt.gz | egrep '^NODE_20_' | gzip >  mappings/NODE_20.depth.txt.gz
+
+
+      Now we quickly use some |R| to make a coverage plot for contig NODE20.
+      Open a |R| shell by typing ``R`` on the command-line of the shell.
+
+
+      .. code:: R
+
+	 x <- read.table('mappings/NODE_20.depth.txt.gz', sep='\t', header=FALSE,  strip.white=TRUE)
+
+	 # Look at the beginning of x
+	 head(x)
+
+	 # calculate average depth
+	 mean(x[,3])
+	 # std dev
+	 sqrt(var(x[,3]))
+
+	 # mark areas that have a coverage below 20 in red
+	 plot(x[,2], x[,3], col = ifelse(x[,3] < 20,'red','black'), pch=19, xlab='postion', ylab='coverage')
+
+	 # to save a plot
+	 png('mappings/covNODE20.png', width = 1200, height = 500)
+	 plot(x[,2], x[,3], col = ifelse(x[,3] < 20,'red','black'), pch=19, xlab='postion', ylab='coverage')
+	 dev.off()
+
+
+      The result plot will be looking similar to the one in :numref:`coverage`
+
+      .. _coverage:
+      .. figure:: images/covNODE20.png
+
+	 A example coverage plot for a contig with highlighted in red regions with a coverage below 20 reads.
+
+
+      .. todo::
+
+	 Look at the created plot. Explain why it makes sense that you find relatively bad coverage at the beginning and the end of the contig.
+
+
+      Stats with QualiMap
+      ~~~~~~~~~~~~~~~~~~~
+
+      For a more in depth analysis of the mappings, one can use |qualimap| [OKO2015]_.
+
+      |qualimap| examines sequencing alignment data in SAM/BAM files according to the features of the mapped reads and provides an overall view of the data that helps to the detect biases in the sequencing and/or mapping of the data and eases decision-making for further analysis.
+
+
+      Run |qualimap| with:
+
+
+      .. code:: bash
+
+	 $ qualimap bamqc -bam mappings/evol1.sorted.dedup.bam
+	 # Once finsished open reult page with
+	 $ firefox mappings/evol1.sorted.dedup_stats/qualimapReport.html
+
+
+      This will create a report in the mapping folder.
+      See this `webpage <http://qualimap.bioinfo.cipf.es/doc_html/analysis.html#output>`__ to get help on the sections in the report.
+
+
+      .. todo::
+
+	 Investigate the mapping of the evolved sample. Write down your observations.
+
+
+
+      Sub-selecting reads
+      -------------------
+
+      It is important to remember that the mapping commands we used above, without additional parameters to sub-select specific alignments (e.g. for |bowtie| there are options like ``--no-mixed``, which suppresses unpaired alignments for paired reads or ``--no-discordant``, which suppresses discordant alignments for paired reads, etc.), are going to output all reads, including unmapped reads, multi-mapping reads, unpaired reads, discordant read pairs, etc. in one file.
+      We can sub-select from the output reads we want to analyse further using |samtools|.
+
+      .. todo::
+
+	 Explain what concordant and discordant read pairs are? Look at the |bowtie| manual.
+
+
+      Concordant reads
+      ~~~~~~~~~~~~~~~~
+
+      We can select read-pair that have been mapped in a correct manner (same chromosome/contig, correct orientation to each other, distance between reads is not stupid). 
+
+
+      .. attention::
+
+	  We show the command here, but we are not going to use it.
+
+
+      .. code:: bash
+
+	 $ samtools view -h -b -f 3 mappings/evol1.sorted.dedup.bam > mappings/evol1.sorted.dedup.concordant.bam
+
+
+      - ``-b``: Output will be bam-format
+      - ``-f 3``: Only extract correctly paired reads. ``-f`` extracts alignments with the specified `SAM flag <http://bio-bwa.sourceforge.net/bwa.shtml#4>`__ set.
+
+
+      .. todo::
+
+	 Our final aim is to identify variants. For a particular class of variants, it is not the best idea to only focus on concordant reads. Why is that?
+
+
+      Quality-based sub-selection
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+      In this section we want to sub-select reads based on the quality of the mapping.
+      It seems a reasonable idea to only keep good mapping reads.
+      As the SAM-format contains at column 5 the :math:`MAPQ` value, which we established earlier is the "MAPping Quality" in Phred-scaled, this seems easily achieved.
+      The formula to calculate the :math:`MAPQ` value is: :math:`MAPQ=-10*log10(p)`, where :math:`p` is the probability that the read is mapped wrongly.
+      However, there is a problem!
+      **While the MAPQ information would be very helpful indeed, the way that various tools implement this value differs.**
+      A good overview can be found `here <https://sequencing.qcfail.com/articles/mapq-values-are-really-useful-but-their-implementation-is-a-mess/>`__.
+      Bottom-line is that we need to be aware that different tools use this value in different ways and the it is good to know the information that is encoded in the value.
+      Once you dig deeper into the mechanics of the :math:`MAPQ` implementation it becomes clear that this is not an easy topic.
+      If you want to know more about the :math:`MAPQ` topic, please follow the link above.
+
+      For the sake of going forward, we will sub-select reads with at least medium quality as defined by |bowtie|:
+
+      .. code:: bash
+
+	  $ samtools view -h -b -q 20 mappings/evol1.sorted.dedup.bam > mappings/evol1.sorted.dedup.q20.bam
+
+
+      - ``-h``: Include the sam header
+      - ``-q 20``: Only extract reads with mapping quality >= 20
+
+
+      .. hint::
+
+	 I will repeat here a recommendation given at the source `link <https://sequencing.qcfail.com/articles/mapq-values-are-really-useful-but-their-implementation-is-a-mess/>`__ above, as it is a good one: If you unsure what :math:`MAPQ` scoring scheme is being used in your own data then you can plot out the :math:`MAPQ` distribution in a BAM file using programs like the mentioned |qualimap| or similar programs.
+	 This will at least show you the range and frequency with which different :math:`MAPQ` values appear and may help identify a suitable threshold you may want to use.
+
+
+      .. todo::
+
+	  Please repeat the whole process for the second evolved strain => mapping and post-processing.
+
+
+      .. note::
+
+	  Should you be unable to process the second evolved strain look at the coding solutions here: :ref:`code-map`
+
+      Unmapped reads
+      ~~~~~~~~~~~~~~
+
+      We could decide to use |kraken| like in section :ref:`taxonomic-investigation` to classify all unmapped sequence reads and identify the species they are coming from and test for contamination.
+
+      Lets see how we can get the unmapped portion of the reads from the bam-file:
+
+
+      .. code:: bash
+
+	  $ samtools view -b -f 4 mappings/evol1.sorted.dedup.bam > mappings/evol1.sorted.unmapped.bam
+	  # we are deleting the original to save space, 
+	  # however, in reality you might want to save it to investigate later
+	  $ rm mappings/evol1.sorted.dedup.bam
+
+	  # count the unmapped reads
+	  $ samtools view -c mappings/evol1.sorted.unmapped.bam
+
+
+      - ``-b``: indicates that the output is BAM.
+      - ``-f INT``: only include reads with this `SAM flag <http://bio-bwa.sourceforge.net/bwa.shtml#4>`__ set. You can also use the command ``samtools flags`` to get an overview of the flags.
+      - ``-c``: count the reads
+
+
+      Lets extract the fastq sequence of the unmapped reads for read1 and read2.
+
+
+      .. code:: bash
+
+	  $ samtools fastq -1 mappings/evol1.sorted.unmapped.R1.fastq.gz -2 mappings/evol1.sorted.unmapped.R2.fastq.gz mappings/evol1.sorted.unmapped.bam
+	  # delete not needed files
+	  $ rm mappings/evol1.sorted.unmapped.bam
+
+
+      .. only:: html
+
+	 .. rubric:: References
+
+
+      .. [LI2009] Li H, Durbin R. (2009). Fast and accurate short read alignment with Burrows-Wheeler transform. `Bioinformatics. 25 (14): 1754–1760. <https://doi.org/10.1093%2Fbioinformatics%2Fbtp324>`__
+
+      .. [OKO2015] Okonechnikov K, Conesa A, García-Alcalde F.  Qualimap 2: advanced multi-sample quality control for high-throughput sequencing data. `Bioinformatics (2015), 32, 2:292–294. <https://doi.org/10.1093/bioinformatics/btv566>`__

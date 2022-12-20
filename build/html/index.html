@@ -1,0 +1,440 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" />
+
+    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
+        <title>ngsSRAtoVCF 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="#"><div class="brand">ngsSRAtoVCF 0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
+  
+  
+  <span class="sidebar-brand-text">ngsSRAtoVCF 0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="ngs-tutorial-from-sra-to-vcf">
+<h1><span class="sectnum">1 </span>NGS tutorial: from SRA to VCF<a class="headerlink" href="#ngs-tutorial-from-sra-to-vcf" title="Permalink to this heading">#</a></h1>
+<p><strong>The NGS tutorial</strong> will guide you from raw SRA files to VCF variants.
+We start with the SRA data from NCBI. Then, we convert them to fastq using the sra-toolkit and then we apply samtools and bcftools to obtain variants.
+We will use A. thaliana data to demonstrate the pipeline</p>
+<section id="download-some-data">
+<h2><span class="sectnum">1.1 </span>Download some data<a class="headerlink" href="#download-some-data" title="Permalink to this heading">#</a></h2>
+<p>Perhaps, this is the most difficult part of the whole pipeline i.e., <strong>where to find data</strong>. Usually, we download data from the NCBI, ENA or other resources, such as the 1000Genomes project or the Arabidopsis project or other web databases.</p>
+</section>
+<section id="overview">
+<h2><span class="sectnum">1.2 </span>Overview<a class="headerlink" href="#overview" title="Permalink to this heading">#</a></h2>
+<p>The following steps will be followed:</p>
+<ol class="arabic">
+<li><p>Download and install the <a class="reference external" href="https://github.com/ncbi/sra-tools">sra-toolkit</a>.</p></li>
+<li><p>Get some data from NCBI (it is supposed that you already know the ID of the runs)</p></li>
+<li><p>Download the SRA data</p></li>
+<li><p>Convert the data to fastq format</p></li>
+<li><p><strong>Mapping</strong>: Run <cite>bwa mem</cite> to perform mapping</p></li>
+<li><p><strong>SAMTOOLS</strong>: Samtools will do some additional operations, such a sorting, fixing the mate flags</p></li>
+<li><p><strong>Calling</strong>: Use bcftools to call the genotypes and produce the GVCF files.</p></li>
+<li><p><strong>Merge the files</strong>: Merge all individual files to a single file containing the information from all sequencded individuals.</p></li>
+<li><p><strong>Final SNP calling and VCF production</strong></p>
+<p>The final product will be a single VCF file that contains <strong>just the SNPs</strong>. Here, there is a specific definition of what a SNP is: <strong>A SNP is a position that at least one individual is different from the reference</strong>. This means, that <strong>a SNP might actually be monomorphic if all individuals are homozygous for the state that is not present in the reference genome</strong>.</p>
+</li>
+</ol>
+</section>
+<section id="download-and-install-the-sra-toolkit">
+<h2><span class="sectnum">1.3 </span>Download and install the sra-toolkit<a class="headerlink" href="#download-and-install-the-sra-toolkit" title="Permalink to this heading">#</a></h2>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Download and install <a class="reference external" href="https://github.com/ncbi/sra-tools">sra-toolkit</a>.
+Even if you can build the code from the source, luckily, there is a link to pre-compiled software available for you system. The link is here <a class="reference external" href="https://github.com/ncbi/sra-tools/wiki/01.-Downloading-SRA-Toolkit">PRECOMPILED SRA-TOOLKIT</a>. For my system, I used the <a class="reference external" href="https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/3.0.2/sratoolkit.3.0.2-ubuntu64.tar.gz">Ubuntu Linux 64bit architecture</a>, even though I’m running a Debian system. It works fine.</p></li>
+<li><p>After you download and unzip the code, you can navigate inside the <strong>sratoolkit.3.0.1-ubuntu64</strong> folder and then inside the <strong>bin</strong> directory. There, you can see the following files:</p></li>
+</ol>
+<a class="reference internal image-reference" href="_images/sradir.png"><img alt="Green-colored files denote the executables. Light-blue files denote softlinks to the executables (e.g., without the version name) for easier usage." src="_images/sradir.png" style="width: 800px;" /></a>
+<ol class="arabic">
+<li><p>It is comfortable to modify your PATH variable, to include this specific directory in the PATH variable.
+* Open the <cite>~/.bashrc</cite> file (e.g. <code class="code docutils literal notranslate"><span class="pre">emacs</span> <span class="pre">-nw</span> <span class="pre">~/.bashrc</span></code> or <code class="code docutils literal notranslate"><span class="pre">vim</span> <span class="pre">~/.bashrc</span></code> or <code class="code docutils literal notranslate"><span class="pre">nano</span> <span class="pre">~/.bashrc</span></code>) and go to the end of the file. Then type something like:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">PATH</span><span class="o">=</span>/home/pavlos/software/sratoolkit.3.0.1-ubuntu64/bin/:<span class="nv">$PATH</span>
+<span class="nb">export</span> PATH
+</pre></div>
+</div>
+<p>In this case, the <code class="code docutils literal notranslate"><span class="pre">/home/pavlos/software/sratoolkit.3.0.1-ubuntu64/bin/</span></code> is the directory that I want to add in the PATH. Please MODIFY it according to your own path. Then, save and close the file and type in the terminal:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span> ~/.bashrc  <span class="c1">## or . ~/.bashrc</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Do NOT forget the $PATH part at the end of the PATH=…. Otherwise, you will destroy the PATH variable of the system. Thus, you actually append to the PATH variable the directory that you need.</p>
+</div>
+</li>
+</ol>
+</div></blockquote>
+</section>
+<section id="download-some-data-using-the-sra-toolkit">
+<h2><span class="sectnum">1.4 </span>Download some data using the sra-toolkit<a class="headerlink" href="#download-some-data-using-the-sra-toolkit" title="Permalink to this heading">#</a></h2>
+<p>Now, that all the tools from the sra-toolkit software package, we are ready to download some data from the SRA database of the NCBI. The SRA file format contains all the information (sequence and base qualities) but they cannot be used directly for the downstream analyses. Thus, we will download them and then we will convert them to FASTQ files.</p>
+<p>Finding the proper SRA files isn’t a very trivial task, since <strong>there are tones of data out there… but they are not so well organized</strong>. For example, at least, for me it’s not trivial at all how to get all SRA files for humans that sampled in Europe. Anyway, in this tutorial we will cheat a bit and we will give you just 3 SRA IDs for 3 Arabidopsis plants. If we have a list of SRA files, then it’s easy to get the data. The difficult task is to find the SRA IDs we need.</p>
+<p>The data we will download have the following SRA IDs:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>SRR1945435
+SRR1945436
+SRR1945437
+</pre></div>
+</div>
+<p>To get a file, we will use the <code class="code docutils literal notranslate"><span class="pre">prefetch</span></code> command from the sra-toolkit. Thus just type:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>prefetch SRR1945435
+</pre></div>
+</div>
+<p>This will just download the SRR1945435 file. If you have saved all the IDs in a file called e.g., “accesions.txt”, you can type</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>prefetch --option-file accesions.txt
+</pre></div>
+</div>
+<p>This will take <strong>some time</strong>. The SRA files are quite large, so please be patient. Also, you need to have <strong>sufficient amount of avaialbe hard disk space</strong>.</p>
+</section>
+<section id="convert-the-data-from-sra-to-fastq">
+<h2><span class="sectnum">1.5 </span>Convert the data from SRA to fastq<a class="headerlink" href="#convert-the-data-from-sra-to-fastq" title="Permalink to this heading">#</a></h2>
+<p>We will use the <code class="code docutils literal notranslate"><span class="pre">fasterq-dump</span></code> to convert the downloaded SRA files to the fastq format. Here we assume paired-end format, so two files will be generated.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If our reads are paired-end, then two fastq files will be created. The first will look like *_1.fastq.gz and the second *_2.fastq.gz.</p>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>fasterq-dump SRR1945437.sra
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The sra files have been stored within folders entitled as their ID. Thus a more efficient way to convert all the SRA to fastq is something like the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> file <span class="k">in</span> <span class="sb">`</span>find -iname <span class="s1">&#39;*.sra&#39;</span> <span class="p">|</span> xargs ls<span class="sb">`</span> <span class="c1">## The &quot;| xargs ls&quot; part can be removed. I just want to have the files alphabetically ordered.</span>
+<span class="k">do</span>
+<span class="nb">echo</span> <span class="nv">$file</span><span class="p">;</span>
+fasterq-dump <span class="nv">$file</span><span class="p">;</span>
+<span class="k">done</span>
+</pre></div>
+</div>
+</div>
+<p>The fastq files will be stored in the folder that we run the command.</p>
+</section>
+<section id="the-quality-control-and-the-mapping-process">
+<h2><span class="sectnum">1.6 </span>The Quality Control and the mapping process<a class="headerlink" href="#the-quality-control-and-the-mapping-process" title="Permalink to this heading">#</a></h2>
+<p>The quality control (QC) is an important part of the analysis since it can save you from the analysis of low-quality data. We will go through that in another tutorial. For now, let’s suppose that the data is of good quality and proceed with the mapping process.</p>
+</section>
+<section id="mapping-the-fastq-reads-on-a-reference-genome">
+<h2><span class="sectnum">1.7 </span>Mapping the fastq reads on a reference genome<a class="headerlink" href="#mapping-the-fastq-reads-on-a-reference-genome" title="Permalink to this heading">#</a></h2>
+<p>Now, we have obtained the fastq files (from the raw SRA files). To proceed with the mapping, we need a reference genome to map the reads (fastq) to the reference.</p>
+<p>First, however, let’s have a look on the fastq files. I will use the command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pavlos@curie:~/teaching/Linux_2022/lecture10$ head -8 SRR1945435_1.fastq
+</pre></div>
+</div>
+<p>This will give the following outcome:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>@SRR1945435.1 HISEQ-02:159:C0E1JACXX:4:1101:1637:1062 <span class="nv">length</span><span class="o">=</span><span class="m">100</span>
+GATGTCATGTGTATGATTGAGTATAAGAACTTANACCGCAACCCGATCTTAAAAGCCTAAGTAGTGTTTCCTTGTTAGAAGACACAAAGCGNNNNNNNNN
++SRR1945435.1 HISEQ-02:159:C0E1JACXX:4:1101:1637:1062 <span class="nv">length</span><span class="o">=</span><span class="m">100</span>
+B@@FFFDFFDFFHIIIJJJJJIIIHIJJIIJII#2?HGGDIJGIIFHIGGHGJIJIJI&gt;GGHIIGHHHHHEDFFCCBEECEAC9?<span class="p">;</span>?#############
+@SRR1945435.2 HISEQ-02:159:C0E1JACXX:4:1101:1630:1098 <span class="nv">length</span><span class="o">=</span><span class="m">100</span>
+GAACAATAGAATAACTAAATAATGGTTAGCTGANTGAAATGAACTAAAGAAAGTTTATGTAGAATGATTATAAATTGCTAAAAAAAACTAGNNNNNNNNN
++SRR1945435.2 HISEQ-02:159:C0E1JACXX:4:1101:1630:1098 <span class="nv">length</span><span class="o">=</span><span class="m">100</span>
+@@@FDFDFHHGFHJJJ4CHIIGIJGHGIIJFHH#1:CCGHIIJJJJJJJEHHG8BFGHIGGIIIJGEGGJIAHGI@DGHIFHHEDDBDC@@#########
+</pre></div>
+</div>
+<p>Here, you can see <strong>two</strong> entries. Each entry spans four lines. The first line of the record starts with a ‘&#64;’. Then, the name of the read (ID) follows. After the line that starts with a ‘&#64;’, there is the sequence line, i.e., what the sequencer returns. <strong>The third</strong> line starts with a ‘+’ and then, the next (after the +) line consists of the read quality scores encoded in a weird system in order to represent about 40 different scores with a single character each. You may find more information about the fastq format here: <a class="reference external" href="https://en.wikipedia.org/wiki/FASTQ_format">fastq in wikipedia</a>.</p>
+<p>These reads (and several millions more) need to be mapped on the reference genome.</p>
+<p>So, <strong>let’s download the reference genome</strong> from the NCBI repository.</p>
+</section>
+<section id="dowload-the-reference-genome">
+<h2><span class="sectnum">1.8 </span>Dowload the reference genome<a class="headerlink" href="#dowload-the-reference-genome" title="Permalink to this heading">#</a></h2>
+<p>We can visit the Genome database of NCBI and search for Arabidopsis thaliana</p>
+<blockquote>
+<div><a class="reference internal image-reference" href="_images/arabidopsis.png"><img alt="The webpage of A. thaliana genome" src="_images/arabidopsis.png" style="width: 800px;" /></a>
+</div></blockquote>
+<p>We can manually download the genome. However, the new NCBI webpage provides a handy tool to get the genome from the command line. The tools is called <em>datasets</em> and it can be downloaded from the new NCBI webpage: <a class="reference external" href="https://www.ncbi.nlm.nih.gov/datasets/docs/v2/download-and-install/">datasets link</a>. Datasets do not need installation. However, the file needs to become executable and be placed within the PATH.</p>
+<p>Assuming that we already have <em>datasets</em> installed, we can try the following command to get the reference genome for A. thaliana.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>datasets download genome accession GCF_000001735.4  --filename GCF_000001735.4.zip
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The genome will be placed within a folder hierarchy <code class="code docutils literal notranslate"><span class="pre">ncbi_dataset/data/GCF_000001735.4</span></code>.</p>
+</div>
+<p>Now, we have the genome and we can proceed with the mapping.</p>
+<section id="indexing">
+<h3><span class="sectnum">1.8.1 </span>Indexing<a class="headerlink" href="#indexing" title="Permalink to this heading">#</a></h3>
+<p>The next command will index the reference genome to speed up mapping later on</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bwa index GCF_000001735.4_TAIR10.1_genomic.fna
+</pre></div>
+</div>
+</section>
+<section id="mapping">
+<h3><span class="sectnum">1.8.2 </span>Mapping<a class="headerlink" href="#mapping" title="Permalink to this heading">#</a></h3>
+<p>After indexing, the next step is to perform the mapping itself. Mapping will need as input the (indexed) reference genome as well as <strong>both</strong> of the _1 and _2 fastq files.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bwa mem -t <span class="m">10</span> GCF_000001735.4_TAIR10.1_genomic.fna SRR1945435_1.fastq SRR1945435_2.fastq -o SRR1945435.sam
+</pre></div>
+</div>
+<p>The previous command will initiate 20 threads to speed up calculations. If reads come in paired files then we need to provide both the _1 and the _2 file (these files will be already in the folder if everything has been correctly downloaded). Of course, it might be the case that you don’t have paired end files, so you don’t expect to have _1 _2 files (each pair) in your directory.</p>
+</section>
+<section id="gvcf-generation">
+<h3><span class="sectnum">1.8.3 </span>GVCF generation<a class="headerlink" href="#gvcf-generation" title="Permalink to this heading">#</a></h3>
+<p>Then, we proceed with the generation of the file (gvcf) containing what we have read in the reference and the sample in each location</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>SAMPLE: the sample file
+REF: The reference file
+
+<span class="c1">## The next command fixes some mapping flags of the sam file</span>
+samtools fixmate -O bam <span class="si">${</span><span class="nv">SAMPLE</span><span class="si">}</span>.sam <span class="si">${</span><span class="nv">SAMPLE</span><span class="si">}</span>.bam
+samtools sort -o <span class="si">${</span><span class="nv">SAMPLE</span><span class="si">}</span>.sort.bam <span class="si">${</span><span class="nv">SAMPLE</span><span class="si">}</span>.bam
+bcftools mpileup -g <span class="m">10</span> -Oz -o <span class="si">${</span><span class="nv">SAMPLE</span><span class="si">}</span>.gvcf.gz -f <span class="si">${</span><span class="nv">REF</span><span class="si">}</span> <span class="si">${</span><span class="nv">SAMPLE</span><span class="si">}</span>.sort.bam
+bcftools index <span class="si">${</span><span class="nv">SAMPLE</span><span class="si">}</span>.gvcf.gz
+</pre></div>
+</div>
+</section>
+<section id="generation-of-the-final-vcf-file">
+<h3><span class="sectnum">1.8.4 </span>Generation of the final VCF file<a class="headerlink" href="#generation-of-the-final-vcf-file" title="Permalink to this heading">#</a></h3>
+<p>Finally, we merge the GVCFs from the different sample files and we create a single VCF file, with just the variants.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bcftools merge -Oz --gvcf REF --merge all -o merged.vcf.gz *.gvcf.gz
+bcftools call -mv merged.vcf.gz -o merged.vcf.gz.mv.vcf
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2022, Pavlos Pavlidis
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#"><span class="sectnum">1 </span>NGS tutorial: from SRA to VCF</a><ul>
+<li><a class="reference internal" href="#download-some-data"><span class="sectnum">1.1 </span>Download some data</a></li>
+<li><a class="reference internal" href="#overview"><span class="sectnum">1.2 </span>Overview</a></li>
+<li><a class="reference internal" href="#download-and-install-the-sra-toolkit"><span class="sectnum">1.3 </span>Download and install the sra-toolkit</a></li>
+<li><a class="reference internal" href="#download-some-data-using-the-sra-toolkit"><span class="sectnum">1.4 </span>Download some data using the sra-toolkit</a></li>
+<li><a class="reference internal" href="#convert-the-data-from-sra-to-fastq"><span class="sectnum">1.5 </span>Convert the data from SRA to fastq</a></li>
+<li><a class="reference internal" href="#the-quality-control-and-the-mapping-process"><span class="sectnum">1.6 </span>The Quality Control and the mapping process</a></li>
+<li><a class="reference internal" href="#mapping-the-fastq-reads-on-a-reference-genome"><span class="sectnum">1.7 </span>Mapping the fastq reads on a reference genome</a></li>
+<li><a class="reference internal" href="#dowload-the-reference-genome"><span class="sectnum">1.8 </span>Dowload the reference genome</a><ul>
+<li><a class="reference internal" href="#indexing"><span class="sectnum">1.8.1 </span>Indexing</a></li>
+<li><a class="reference internal" href="#mapping"><span class="sectnum">1.8.2 </span>Mapping</a></li>
+<li><a class="reference internal" href="#gvcf-generation"><span class="sectnum">1.8.3 </span>GVCF generation</a></li>
+<li><a class="reference internal" href="#generation-of-the-final-vcf-file"><span class="sectnum">1.8.4 </span>Generation of the final VCF file</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/scripts/furo.js"></script>
+    </body>
+</html>
